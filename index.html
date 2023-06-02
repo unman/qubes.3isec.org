@@ -6,6 +6,7 @@
 	<li><a href="Templates_4.1/">Templates for 4.1</a></li>
 	<li><a href="4.1/">Ubuntu packages for 4.1</a></li>
 	<li><a href="arch">Archlinux packages</a></li>
+	<li><a href="tasks.html">Simple qube set up</a></li>
 
 </ul>
 
@@ -50,7 +51,6 @@ Then add a line like this to /etc/apt/sources.list:
 <pre>
 deb [signed-by=/usr/share/keyrings/unman-keyring.gpg] https://qubes.3isec.org/4.1 focal main
 </pre>
-<br>
 or:
 <br>
 <pre>
@@ -72,7 +72,7 @@ cd /etc/pacman.d
 
 Then either create a new file, or rename the existing
 <pre>
-99-qubes-repository-4.1.conf.disabled</pre> to <pre>99-qubes-repository-4.1.conf</pre>.
+99-qubes-repository-4.1.conf.disabled</pre> to <pre>99-qubes-repository-4.1.conf</pre>
 Open the conf file for editing - the contents should be:
 <pre>
 [qubes-r4.1]
