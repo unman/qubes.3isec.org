@@ -2,47 +2,91 @@
 <h1>Qubes templates</h1>
 
 All templates are signed with my Qubes OS Signing key:
-<code>
-pub   4096R/C8C0C2EF 2016-06-25
-      Key fingerprint = 4B1F 400D F256 51B5 3C41  41B3 8B3F 30F9 C8C0 C2EF
-uid                  unman (Qubes OS signing key) <unman@thirdeyesecurity.org>
-sub   4096R/4731B36C 2016-06-27 [expires: 2022-06-30]
-</code>
+<pre>
+pub   rsa4096 2016-06-25 [SC]
+      4B1F 400D F256 51B5 3C41  41B3 8B3F 30F9 C8C0 C2EF
+uid           [ unknown] unman (Qubes OS signing key) <unman@thirdeyesecurity.org>
+sub   rsa4096 2016-06-27 [S] [expires: 2024-06-30]
+sub   rsa4096 2016-06-25 [E]
+</pre>
 
 <br>
-You can read about how to get a copy of the key, and how to validate it <a href="./index.html">here</a>.
+You can read about how to get a copy of the key, and how to validate it <a href="../index.html">here</a>.
 <br>
 You will need to copy the key in to dom0:
 <br>
 <code>
-qvm-run -p  <qube> 'cat <path to key> ' > unman.pub
+qvm-run -p  qube 'cat PATH_TO_KEY ' > RPM-GPG-KEY-unman
 </code>
 <br>
-and then import it:
+and then move it into place:
+<br>
 <code>
-sudo rpm --import unman.pub
+sudo mv RPM-GPG-KEY-unman /etc/pki/rpm-gpg/RPM-GPG-KEY-unman
 </code>
 <p>
 Download the template you want to use, and copy it into dom0:
 <br>
 <code>
-qvm-run -p  <qube> 'cat <path to downloaded template> ' > <template_package_name>
+qvm-run -p  QUBE 'cat PATH_TO_DOWNLOADED_TEMPLATE ' > TEMPLATE_PACKAGE_NAME
 </code>
 <br>
-replacing <pre><template_package_name></pre> with a name of your choice.
+replacing <code>TEMPLATE_PACKAGE_NAME</code> with a name of your choice.
 <br>
 Then check the signature by (e.g):
 <br>
 <code>
-rpm -K template_package_name
+rpm -K TEMPLATE_PACKAGE_NAME
 </code>
 <br>
-<p>
+<br>
+Install the template using qvm-template:
+<br>
+<code>
+qvm-template install --keyring /etc/pki/rpm-gpg/RPM-GPG-KEY-unman FULL_PATH_TO_DOWNLOADED_TEMPLATE
+</code>
 
+
+
+<h3>Using qvm-template</h3>
+It is also possible to use the native Qubes tools for template management.
+<br>
+To do this you will need to copy the key to dom0, as above, and move it:
+<br>
+<code>
+sudo mv RPM-GPG-KEY-unman /etc/qubes/repo-templates/keys/RPM-GPG-KEY-unman
+</code>
+<br>
+<br>
+
+You will also need to create the repository definition.
+<br>
+Create a file at /etc/qubes/repo-templates/3isec-templates.repo, with this content:
+<pre>
+<code>
+[3isec-templates]
+name = 3isec Qubes Templates Repository (updates)
+baseurl = https://qubes.3isec.org/rpm/r$releasever/templates
+skip_if_unavailable = False
+enabled = 1
+metadata_expire = 6h
+gpgcheck = 1
+gpgkey = file:////etc/qubes/repo-templates/keys/RPM-GPG-KEY-unman
+</code>
+</pre>
+
+Now you can use qvm-template or qvm-template-gui, as normal.
+
+
+
+
+<h2>Rolling distros - Parrot, Arch, Kali</h2>
 Templates like Parrot or Kali are based on Debian testing.
 <br>
 To avoid breakage when updating, the core Qubes packages are on hold. 
+<br>
 <b>This means that they will not be updated.</b>
+<br>
 You can confirm this by running <code>apt-mark showhold</code> in the template.
 <br>
 <code>apt-mark unhold </code> will remove the hold, and allow you to update the Qubes packages.
@@ -62,6 +106,39 @@ Then again, if you use aptitude you would be able to see what changes would be m
 This depends on you looking to see what changes will be made and acting accordingly.
 Using  <code>apt-mark hold </code> will take some pressure off.
 <p>
+
+<H2>Installing large templates</H2>
+In 4.1, dom0 is pegged at 20G by default.
+<br>
+This means that you will not be able to install the larger templates, like parrot, without  taking some action.
+<br>
+The easiest thing to do is to increase the size of dom0. On a default install you can do this simply enough by:
+<br>
+<code>
+	sudo lvresize --size 40G /dev/qubes_dom0/root
+<br>
+	sudo resize2fs /dev/mapper/qubes_dom0-root
+</code>
+<p>
+For more details and options, look <a href="https://github.com/unman/notes/blob/master/Installing_Templates_Qubes_4.1.md">here</a>.
+<p>
+
+<H2>Repository definitions and apt-cacher-ng</H2>
+Very often, the repository definitions in these templates are modified to enable use of the apt-cacher-ng caching proxy.
+Instead of <code>https://</code> the definitions have <code>http://HTTPS///</code> - this is so that the caching proxy can see the request, and then connect to the repository over https.
+You can read about this <a href="https://www.unix-ag.uni-kl.de/~bloch/acng/html/howtos.html#ssluse">here</a>
+<br>
+If you use apt-cacher-ng, that's fine. Everything will just work&trade;.
+<br>
+If you do not use apt-cacher-ng, then you can install it using <a href="https://qubes.3isec.org/tasks.html">this tool</a>.
+<br>
+If you do not use apt-cacher-ng, or you do not want to use it for <em>this</em> template, edit the repository definitions, replacing 
+<code>http://HTTPS///</code> with <code>https://</code> 
+<br>
+<br>
+<em>Always check that the repository definitions suit your use case.</em>
+<p>
+
+
 unman
-	
-</body></html>
+
